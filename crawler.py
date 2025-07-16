@@ -1,4 +1,5 @@
 import requests
+import datetime
 import os
 from bs4 import BeautifulSoup
 import random
@@ -77,14 +78,25 @@ def main():
         year, month, day = date.split('/')
         fut_path=f'./fut/Fut_{year}_{month}_{day}.zip'
         opt_path=f'./opt/Opt_{year}_{month}_{day}.zip'
-        if os.path.exists(fut_path):
+        fut_checker=True
+        opt_checker=True
+        #if its today
+        if date == time.strftime("%Y/%m/%d"):
+            if os.path.exists(fut_path):
+                if os.path.getctime(fut_path) < datetime.combine(datetime.today().date(), time(hour=18)).timestamp():
+                    fut_checker=False
+            if os.path.exists(opt_path):
+                if os.path.getctime(opt_path) < datetime.combine(datetime.today().date(), time(hour=18)).timestamp():
+                    opt_checker=False
+        
+        if os.path.exists(fut_path) and fut_checker:
             print(f"Futures data for {year}-{month}-{day} already exists, skipping download.")
         else:
             download_futures_data(year, month, day)
             time.sleep(random.uniform(3, 5))
             
             
-        if os.path.exists(opt_path):
+        if os.path.exists(opt_path) and opt_checker:
             print(f"Options data for {year}-{month}-{day} already exists, skipping download.")
         else:
             download_options_data(year, month, day)
